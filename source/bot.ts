@@ -1,5 +1,5 @@
 import { OpenAI } from "openai";
-import { ChatCompletionMessage, CreateChatCompletionRequestMessage } from "openai/resources/chat";
+import { ChatCompletionMessage, ChatCompletionMessageParam } from "openai/resources/chat";
 import { ZodRawShape, z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { TransientMessageStore } from "./memory-store";
@@ -43,11 +43,11 @@ export class Bot {
     const contextMessages = this.#params.messages ?? [];
 
     // Compile messages provided during bot initialization + history + current message
-    const messages: CreateChatCompletionRequestMessage[] = [
+    const messages: ChatCompletionMessageParam[] = [
       ...contextMessages,
       ...history,
       ...(message?.trim()
-        ? [{ role: "user", content: message } as CreateChatCompletionRequestMessage]
+        ? [{ role: "user", content: message } as ChatCompletionMessageParam]
         : []),
     ];
 
@@ -136,7 +136,7 @@ export class Bot {
     let response: ReadResponse;
 
     if (message) {
-      await this.#store.add({ role: "user", content: message });
+      await this.#store.add({ role: "user", content: message, refusal: null } as unknown as ChatCompletionMessage);
     }
 
     const { data, response: openaiResponse } = await this.#client.chat.completions
@@ -185,7 +185,7 @@ export class Bot {
           const result = await fun.call(args);
 
           // Send function result back to model
-          const messages: CreateChatCompletionRequestMessage[] = [
+          const messages: ChatCompletionMessageParam[] = [
             ...request.messages,
             { role: "assistant", function_call: functionCall, content: null },
             {

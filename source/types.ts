@@ -1,8 +1,8 @@
 import { OpenAI } from "openai";
-import { ChatCompletionMessage, CreateChatCompletionRequestMessage } from "openai/resources/chat";
+import { ChatCompletionMessage, ChatCompletionMessageParam } from "openai/resources/chat";
 import { ZodObject, ZodRawShape, z } from "zod";
 
-export type CompletionParams = Omit<OpenAI.Chat.CompletionCreateParams, "stream" | "n">;
+export type CompletionParams = Omit<OpenAI.Chat.ChatCompletionCreateParams, "stream" | "n">;
 
 export type BotOptions = {
   /**
@@ -18,7 +18,7 @@ export type BotOptions = {
   messageStore?: MessageStore;
 };
 
-export type BotFunction = OpenAI.Chat.CompletionCreateParams.Function & {
+export type BotFunction = OpenAI.Chat.ChatCompletionCreateParams.Function & {
   call: (...args: any[]) => any;
 };
 
